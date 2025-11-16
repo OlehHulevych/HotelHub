@@ -1,6 +1,8 @@
-﻿namespace server.models;
+﻿using Microsoft.AspNetCore.Identity;
 
-public class User
+namespace server.models;
+
+public class User:IdentityUser
 {
     public int Id { get; set; }
     public string Name { get; set; }
