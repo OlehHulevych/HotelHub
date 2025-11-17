@@ -36,7 +36,8 @@ public class ApplicationDbContext:IdentityDbContext
             .HasOne(u => u.User)
             .WithOne(t => t.RefreshToken)
             .HasForeignKey<Token>(rt => rt.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.
+                Cascade);
 
     }
 }

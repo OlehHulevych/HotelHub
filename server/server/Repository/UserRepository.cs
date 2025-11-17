@@ -1,6 +1,7 @@
 ﻿using server.DTO;
 using server.IRepositories;
 using BCrypt.Net;
+using server.Data;
 using server.models;
 
 
@@ -8,7 +9,13 @@ namespace server.Repository;
 
 public class UserRepository:IUserRepository
 {
-    public Task<UserDto> RegisterUser(RegisterDTO data)
+    private ApplicationDbContext _context;
+
+    public UserRepository(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+    public async Task<UserDto> RegisterUser(RegisterDTO data)
     {
         if (data.Name == null && data.Password == null)
         {
@@ -26,6 +33,11 @@ public class UserRepository:IUserRepository
             
         };
 
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync();
+        
+        
+
         UserDto userDto = new UserDto
         {
             Name = user.Name,
@@ -33,7 +45,8 @@ public class UserRepository:IUserRepository
             Password = user.Password
         };
 
-        return Task.FromResult(userDto);
+
+        return userDto;
 
 
 

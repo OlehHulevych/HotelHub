@@ -137,3 +137,5 @@ F:\Projects\HotelHub\server\server\obj\Debug\net8.0-windows\refint\server.dll
 F:\Projects\HotelHub\server\server\obj\Debug\net8.0-windows\server.pdb
 F:\Projects\HotelHub\server\server\obj\Debug\net8.0-windows\server.genruntimeconfig.cache
 F:\Projects\HotelHub\server\server\obj\Debug\net8.0-windows\ref\server.dll
+F:\Projects\HotelHub\server\server\bin\Debug\net8.0-windows\BCrypt.Net-Next.dll
+F:\Projects\HotelHub\server\server\bin\Debug\net8.0-windows\Microsoft.AspNetCore.Authentication.JwtBearer.dll
