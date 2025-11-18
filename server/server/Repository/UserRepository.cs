@@ -1,6 +1,8 @@
 ﻿using server.DTO;
 using server.IRepositories;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.models;
 
@@ -10,10 +12,12 @@ namespace server.Repository;
 public class UserRepository:IUserRepository
 {
     private ApplicationDbContext _context;
+    private readonly UserManager<User> _userManager;
 
-    public UserRepository(ApplicationDbContext context)
+    public UserRepository(ApplicationDbContext context, UserManager<User> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
     public async Task<UserDto> RegisterUser(RegisterDTO data)
     {
@@ -22,19 +26,21 @@ public class UserRepository:IUserRepository
             return null;
         }
 
-        var passwordHashed = BCrypt.Net.BCrypt.HashPassword(data.Password);
         User user = new User
         {
             Name = data.Name,
-            Password = passwordHashed,
             Email = data.Email,
+            UserName = data.Email, 
             Reservations = new List<Reservation>(),
-            Role = data.Role != null? data.Role: Roles.User,
             
         };
+        var result = await _userManager.CreateAsync(user, data.Password);
+        if (!result.Succeeded)
+        {
+            return null;
+        }
 
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        //await _userManager.AddToRoleAsync(user, Roles.User);
         
         
 
@@ -42,7 +48,7 @@ public class UserRepository:IUserRepository
         {
             Name = user.Name,
             Email = user.Email,
-            Password = user.Password
+            
         };
 
 
