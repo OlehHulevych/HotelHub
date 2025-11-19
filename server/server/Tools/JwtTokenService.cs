@@ -24,14 +24,19 @@ public class JwtTokenService
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email)
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Name),
         };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var newToken = new JwtSecurityToken(
+            issuer:_config["Jwt:Issuer"],
+            audience:_config["Jwt:Audience"],
             claims:claims,
-            signingCredentials:creds
+            signingCredentials:creds,
+            expires:DateTime.UtcNow.AddHours(10)
+            
         );
         var jwtHandler = new JwtSecurityTokenHandler();
         var tokenString = jwtHandler.WriteToken(newToken);
@@ -40,6 +45,8 @@ public class JwtTokenService
             UserId = user.Id,
             User = user,
             TokenString = tokenString,
+            CreatedAt = DateTime.Now,
+            ExpiresAt = DateTime.UtcNow.AddHours(10)
             
             
         };

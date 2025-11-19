@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using server.Data;
 
 using server.DTO;
@@ -41,5 +42,21 @@ public class UserController : Controller
 
 
 
+    }
+    [HttpPost("login")]
+    public async Task<IActionResult> login([FromBody] LoginDTO data)
+    {
+        if (string.IsNullOrWhiteSpace(data.Email) && string.IsNullOrWhiteSpace(data.Password))
+        {
+            return BadRequest("Something is missing");
+        }
+
+        var result = await _userRepository.LoginUser(data);
+        if (result.Email == null || result.Name == null || result.Token == null)
+        {
+            return BadRequest(result.Error);
+        }
+
+        return Ok(result);
     }
 }
