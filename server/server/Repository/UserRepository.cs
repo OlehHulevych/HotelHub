@@ -40,9 +40,7 @@ public class UserRepository:IUserRepository
             return null;
         }
 
-        //await _userManager.AddToRoleAsync(user, Roles.User);
-        
-        
+        await _userManager.AddToRoleAsync(user, Roles.User);
 
         UserDto userDto = new UserDto
         {
@@ -50,6 +48,7 @@ public class UserRepository:IUserRepository
             Email = user.Email,
             
         };
+        
 
 
         return userDto;
