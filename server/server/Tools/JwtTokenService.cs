@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using server.Data;
 using server.models;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 
 namespace server.Tools;
 
@@ -50,6 +51,12 @@ public class JwtTokenService
             
             
         };
+        var check = await _context.Tokens.AnyAsync(item=>item.UserId == user.Id);
+        if (check)
+        {
+            var existingToken = await _context.Tokens.FirstOrDefaultAsync(item => item.UserId == user.Id);
+            return existingToken;
+        }
         await _context.Tokens.AddAsync(token);
         await _context.SaveChangesAsync();
         return token;
