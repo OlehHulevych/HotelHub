@@ -56,6 +56,13 @@ public class UserController : Controller
         {
             return BadRequest(result.Error);
         }
+        Response.Cookies.Append("refreshToken",result.Token.TokenString, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = DateTime.UtcNow.AddDays(7)
+        } );
 
         return Ok(result);
     }

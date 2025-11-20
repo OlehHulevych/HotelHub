@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
 
 namespace server.models;
 
 public class User:IdentityUser
 {
-    public string Id { get; set; }
     public string Name { get; set; }
-    
-    
-
+    [JsonIgnore]
     public Token RefreshToken { get; set; } = null;
     
     public List<Reservation> Reservations { get; set; } = new();
