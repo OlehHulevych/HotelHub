@@ -66,4 +66,20 @@ public class UserController : Controller
 
         return Ok(result);
     }
+    [HttpPost("logout")]
+    public async Task<IActionResult> logout([FromBody] string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return BadRequest("There must be email");
+        }
+
+        var result = _userRepository.LogoutUser(email);
+        if (!result.Result.Result)
+        {
+            return BadRequest(result.Result.Error);
+        }
+
+        return Ok(result);
+    }
 }
