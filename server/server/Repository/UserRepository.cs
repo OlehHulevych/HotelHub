@@ -146,5 +146,39 @@ public class UserRepository:IUserRepository
 
     }
 
+    public async Task<ResultDTO> ChangeUserPassword(string id, ChnagePasswordDTO model)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            return new ResultDTO
+            {
+                result = false,
+                Message = "The user is not found"
+            };
+        }
+
+        
+        
+
+        var setNewPassword = await _userManager.ChangePasswordAsync(user, model.oldPassword, model.newPassword);
+        if (!setNewPassword.Succeeded)
+        {
+            return new ResultDTO()
+            {
+                result = false,
+                Message = "Invalid Password",
+            };
+        }
+
+        return new ResultDTO()
+        {
+            result = true,
+            Message = "Password was changed"
+        };
+
+
+    }
+
     
 }

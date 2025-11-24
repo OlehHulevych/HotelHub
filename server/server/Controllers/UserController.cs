@@ -86,7 +86,25 @@ public class UserController : Controller
         }
         HttpContext.Session.Remove("UserId");
         return Ok("The use is loged out");
+    }
+    
+    [HttpPost("changePasword")]
+    public async Task<IActionResult> ChangePassword([FromForm] ChnagePasswordDTO model)
+    {
+        string UserId = HttpContext.Session.GetString("UserId");
+        Console.WriteLine("This is id: "+UserId);
+        if (UserId == null)
+        {
+            return Unauthorized("The user is not authorized");
+        }
 
+        var result = await _userRepository.ChangeUserPassword(UserId, model);
+        if(!result.result)
+        {
+            return BadRequest(result.Message);
+        }
+
+        return Ok(result.Message);
 
     }
 }
