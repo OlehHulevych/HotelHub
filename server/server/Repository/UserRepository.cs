@@ -109,8 +109,7 @@ public class UserRepository:IUserRepository
 
         return new LoginResponseDTO
         {
-            Email = foundUser.Email,
-            Name = foundUser.Name,
+            FoundUser = foundUser,
             Token = token
         };
 

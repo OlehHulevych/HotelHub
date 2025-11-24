@@ -21,6 +21,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServe
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 builder.Services.AddAuthentication(options =>
@@ -69,6 +76,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+
+await EnsureRolesAsync(app);
+
+app.UseSession();
+app.UseHttpsRedirection();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthentication();
+
+app.MapControllers();
+app.UseHttpsRedirection();
+
+
+app.Run();
 async Task EnsureRolesAsync(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
@@ -82,12 +104,3 @@ async Task EnsureRolesAsync(WebApplication app)
         }
     }
 }
-
-await EnsureRolesAsync(app);
-
-app.UseHttpsRedirection();
-app.MapControllers();
-app.UseHttpsRedirection();
-app.UseCors();
-
-app.Run();

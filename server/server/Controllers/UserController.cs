@@ -25,7 +25,7 @@ public class UserController : Controller
     // GET
 
     [HttpPost("register")]
-    public async Task<IActionResult> register([FromBody] RegisterDTO data)
+    public async Task<IActionResult> register([FromForm] RegisterDTO data)
     {
         if (!ModelState.IsValid)
         {
@@ -44,7 +44,7 @@ public class UserController : Controller
 
     }
     [HttpPost("login")]
-    public async Task<IActionResult> login([FromBody] LoginDTO data)
+    public async Task<IActionResult> login([FromForm] LoginDTO data)
     {
         if (string.IsNullOrWhiteSpace(data.Email) && string.IsNullOrWhiteSpace(data.Password))
         {
@@ -52,7 +52,7 @@ public class UserController : Controller
         }
 
         var result = await _userRepository.LoginUser(data);
-        if (result.Email == null || result.Name == null || result.Token == null)
+        if (result.FoundUser == null || result.Token == null)
         {
             return BadRequest(result.Error);
         }
@@ -63,23 +63,30 @@ public class UserController : Controller
             SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddDays(7)
         } );
-
+        HttpContext.Session.SetString("UserId",result.FoundUser.Id );
+        
         return Ok(result);
     }
-    [HttpPost("logout")]
-    public async Task<IActionResult> logout([FromBody] string email)
+    [HttpGet("logout")]
+    public async Task<IActionResult> logout()
     {
-        if (string.IsNullOrWhiteSpace(email))
+        string userId = HttpContext.Session.GetString("UserId");
+        if (userId == null)
         {
-            return BadRequest("There must be email");
+            return BadRequest(new LogoutDTO
+            {
+                Error = "The id of user is not available"
+            });
         }
 
-        var result = _userRepository.LogoutUser(email);
-        if (!result.Result.Result)
+        bool result = await _jwtTokenService.DestroyToken(userId);
+        if (!result)
         {
-            return BadRequest(result.Result.Error);
+            return BadRequest("Something went wrong");
         }
+        HttpContext.Session.Remove("UserId");
+        return Ok("The use is loged out");
 
-        return Ok(result);
+
     }
 }
