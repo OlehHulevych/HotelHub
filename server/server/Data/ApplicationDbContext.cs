@@ -38,6 +38,11 @@ public class ApplicationDbContext:IdentityDbContext
             .HasForeignKey<Token>(rt => rt.UserId)
             .OnDelete(DeleteBehavior.
                 Cascade);
+        modelBuilder.Entity<RoomType>()
+            .HasMany(rt => rt.RoomList)
+            .WithOne(r => r.Type)
+            .HasForeignKey(e => e.RoomTypeId)
+            .OnDelete(DeleteBehavior.Cascade);
 
     }
 }
