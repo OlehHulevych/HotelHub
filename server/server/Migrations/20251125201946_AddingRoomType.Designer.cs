@@ -12,8 +12,8 @@ using server.Data;
 namespace server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251125201431_AddingTypeOfRoom")]
-    partial class AddingTypeOfRoom
+    [Migration("20251125201946_AddingRoomType")]
+    partial class AddingRoomType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -315,7 +315,7 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RoomType");
+                    b.ToTable("RoomTypes");
                 });
 
             modelBuilder.Entity("server.models.Token", b =>

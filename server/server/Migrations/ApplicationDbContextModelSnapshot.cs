@@ -312,7 +312,7 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RoomType");
+                    b.ToTable("RoomTypes");
                 });
 
             modelBuilder.Entity("server.models.Token", b =>

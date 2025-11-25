@@ -5,7 +5,7 @@
 namespace server.Migrations
 {
     /// <inheritdoc />
-    public partial class AddingTypeOfRoom : Migration
+    public partial class AddingRoomType : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace server.Migrations
                 defaultValue: 0);
 
             migrationBuilder.CreateTable(
-                name: "RoomType",
+                name: "RoomTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -28,7 +28,7 @@ namespace server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoomType", x => x.Id);
+                    table.PrimaryKey("PK_RoomTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
@@ -37,10 +37,10 @@ namespace server.Migrations
                 column: "RoomTypeId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Rooms_RoomType_RoomTypeId",
+                name: "FK_Rooms_RoomTypes_RoomTypeId",
                 table: "Rooms",
                 column: "RoomTypeId",
-                principalTable: "RoomType",
+                principalTable: "RoomTypes",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }
@@ -49,11 +49,11 @@ namespace server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Rooms_RoomType_RoomTypeId",
+                name: "FK_Rooms_RoomTypes_RoomTypeId",
                 table: "Rooms");
 
             migrationBuilder.DropTable(
-                name: "RoomType");
+                name: "RoomTypes");
 
             migrationBuilder.DropIndex(
                 name: "IX_Rooms_RoomTypeId",

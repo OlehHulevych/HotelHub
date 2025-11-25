@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using server.Data;
 
@@ -63,14 +65,15 @@ public class UserController : Controller
             SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddDays(7)
         } );
-        HttpContext.Session.SetString("UserId",result.FoundUser.Id );
+        
         
         return Ok(result);
     }
+    [Authorize]
     [HttpGet("logout")]
     public async Task<IActionResult> logout()
     {
-        string userId = HttpContext.Session.GetString("UserId");
+        string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
         {
             return BadRequest(new LogoutDTO
@@ -87,11 +90,11 @@ public class UserController : Controller
         HttpContext.Session.Remove("UserId");
         return Ok("The use is loged out");
     }
-    
+    [Authorize]
     [HttpPost("changePasword")]
     public async Task<IActionResult> ChangePassword([FromForm] ChnagePasswordDTO model)
     {
-        string UserId = HttpContext.Session.GetString("UserId");
+        string UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         Console.WriteLine("This is id: "+UserId);
         if (UserId == null)
         {
