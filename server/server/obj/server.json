@@ -97,7 +97,7 @@
         }
       }
     },
-    "/api/user/changePasword": {
+    "/api/user/changePassword": {
       "post": {
         "tags": [
           "User"

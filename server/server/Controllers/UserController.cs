@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,9 @@ using server.Repository;
 using server.Tools;
 
 namespace server.Controllers;
-
+[ApiController]
 [Route("api/user")]
-public class UserController : Controller
+public class UserController : ControllerBase
 {
     private ApplicationDbContext _context;
 
@@ -58,16 +59,10 @@ public class UserController : Controller
         {
             return BadRequest(result.Error);
         }
-        Response.Cookies.Append("refreshToken",result.Token.TokenString, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTime.UtcNow.AddDays(7)
-        } );
         
         
-        return Ok(result);
+        
+        return Ok(new {result.Token});
     }
     [Authorize]
     [HttpGet("logout")]
@@ -90,8 +85,8 @@ public class UserController : Controller
         HttpContext.Session.Remove("UserId");
         return Ok("The use is loged out");
     }
-    [Authorize]
-    [HttpPost("changePasword")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost("changePassword")]
     public async Task<IActionResult> ChangePassword([FromForm] ChnagePasswordDTO model)
     {
         string UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

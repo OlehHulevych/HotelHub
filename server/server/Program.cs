@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using server.Data;
 using server.IRepositories;
 using server.models;
@@ -18,46 +19,36 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 string stringConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServer(stringConnection));
-builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-var jwtKey = builder.Configuration["Jwt:Key"];
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer( options =>
+}).AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = true;
-    options.SaveToken = false;
-    options.TokenValidationParameters = new TokenValidationParameters()
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
+        ValidateIssuer = true,
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
-        {
-            if (context.Request.Headers.ContainsKey("Autoriztion"))
-            {
-                return Task.CompletedTask;
-            }
+});
+builder.Services.AddAuthorization();
+builder.Services.AddSwaggerGen(options =>
+{
+    // 1. Define the Security Scheme (How the API handles auth)
+   
 
-            return Task.CompletedTask;
-        }
-    };
+    // 2. Add the Security Requirement (Apply it to endpoints)
+    
 });
 builder.Services.AddCors(options =>
 {
@@ -66,6 +57,14 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
 });
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+
+
+builder.Services.AddAuthorization();
+
+
 
 var app = builder.Build();
 
@@ -79,15 +78,13 @@ if (app.Environment.IsDevelopment())
 
 
 await EnsureRolesAsync(app);
-
-app.UseSession();
-app.UseHttpsRedirection();
-app.UseCors();
+//app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseAuthentication();
-app.UseAuthentication();
-
+app.UseAuthorization();
 app.MapControllers();
-app.UseHttpsRedirection();
+
+
 
 
 app.Run();

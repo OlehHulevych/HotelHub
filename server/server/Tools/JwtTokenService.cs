@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using server.Data;
 using server.models;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace server.Tools;
@@ -14,56 +15,47 @@ public class JwtTokenService
 {
     private ApplicationDbContext _context;
     private readonly IConfiguration _config;
+    public UserManager<User> _UserManager;
 
-    public JwtTokenService(IConfiguration config, ApplicationDbContext context)
+    public JwtTokenService(IConfiguration config, ApplicationDbContext context, UserManager<User> userManager)
     {
         _config = config;
         _context = context;
+        _UserManager = userManager;
     }
 
-    public async Task<Token> CreateToken(User user)
+    public async Task<string> CreateToken(User user)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var newToken = new JwtSecurityToken(
-            issuer:_config["Jwt:Issuer"],
-            audience:_config["Jwt:Audience"],
-            claims:claims,
-            signingCredentials:creds,
-            expires:DateTime.UtcNow.AddHours(10)
-            
-        );
-        var jwtHandler = new JwtSecurityTokenHandler();
-        var tokenString = jwtHandler.WriteToken(newToken);
-        Token token = new Token
+
+        // Add user roles
+        var roles = await _UserManager.GetRolesAsync(user);
+        foreach (var role in roles)
         {
-            UserId = user.Id,
-            User = user,
-            TokenString = tokenString,
-            CreatedAt = DateTime.Now,
-            ExpiresAt = DateTime.UtcNow.AddHours(10)
-            
-            
-        };
-        var check = await _context.Tokens.AnyAsync(item=>item.UserId == user.Id);
-        if (check)
-        {
-            var existingToken = await _context.Tokens.FirstOrDefaultAsync(item => item.UserId == user.Id);
-            return existingToken;
+            claims.Add(new Claim(ClaimTypes.Role, role));
         }
-        await _context.Tokens.AddAsync(token);
-        await _context.SaveChangesAsync();
-        return token;
 
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? string.Empty));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        var token = new JwtSecurityToken(
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"] ?? _config["Jwt:Issuer"],
+            claims: claims,
+            expires: DateTime.Now.AddHours(3),
+            signingCredentials: creds);
 
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+
+
 
     public async Task<bool> DestroyToken(string userId)
     {

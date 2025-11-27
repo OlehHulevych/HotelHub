@@ -148,6 +148,7 @@ public class UserRepository:IUserRepository
 
     public async Task<ResultDTO> ChangeUserPassword(string id, ChnagePasswordDTO model)
     {
+        Console.WriteLine("Hello world");
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
