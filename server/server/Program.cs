@@ -20,6 +20,7 @@ builder.Services.AddControllers();
 string stringConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServer(stringConnection));
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<RoomTypeRepository>();
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();

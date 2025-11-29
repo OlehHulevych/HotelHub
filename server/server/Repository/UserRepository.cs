@@ -45,6 +45,11 @@ public class UserRepository:IUserRepository
             return null;
         }
 
+        if (data.Role == "ADMIN")
+        {
+            await _userManager.AddToRoleAsync(user, Roles.Admin);
+        }
+
         await _userManager.AddToRoleAsync(user, Roles.User);
 
         UserDto userDto = new UserDto
