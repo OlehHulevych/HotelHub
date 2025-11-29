@@ -37,4 +37,21 @@ public class RoomTypeController:ControllerBase
         return Ok(result);
 
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTypeRoom(int id)
+    {
+        if (id == null)
+        {
+            return BadRequest(new {message = "There is no id of room type"});
+        }
+
+        var response = await _roomTypeRepository.RemoveRoomType(id);
+        if (!response.result)
+        {
+            return BadRequest(new { message = response.Message });
+        }
+
+        return Ok(response);
+    }
 }

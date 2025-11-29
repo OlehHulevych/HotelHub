@@ -1,4 +1,5 @@
-﻿using server.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using server.Data;
 using server.DTO;
 using server.IRepositories;
 using server.models;
@@ -43,4 +44,36 @@ public class RoomTypeRepository:IRoomTypeRepository
 
 
     }
+
+    public async Task<ResultDTO> RemoveRoomType(int id)
+    {
+        if (id == null)
+        {
+            return new ResultDTO
+            {
+                result = false,
+                Message = "There is no any id"
+            };
+        }
+
+        var foundType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Id == id);
+        if (foundType == null)
+        {
+            return new ResultDTO
+            {
+                result = false,
+                Message = "The room type is not found",
+            };
+        }
+        _context.RoomTypes.Remove(foundType);
+        await _context.SaveChangesAsync();
+        return new ResultDTO
+        {
+            result = false,
+            Message = "The room type was deleted"
+        };
+        
+
+    }
+    
 }
