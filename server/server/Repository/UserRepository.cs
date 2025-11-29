@@ -185,6 +185,34 @@ public class UserRepository:IUserRepository
 
 
     }
-
     
+    public async Task<ResultDTO> getUserInformation(string id)
+    {
+        if (id == null)
+        {
+            return new ResultDTO
+            {
+                result = false,
+                Message = "There is no id ",
+
+            };
+        }
+
+        var foundUser = await _userManager.FindByIdAsync(id);
+        if (foundUser == null)
+        {
+            return new ResultDTO
+            {
+                result = false,
+                Message = "The user is not found"
+            };
+        }
+
+        return new ResultDTO
+        {
+            result = true,
+            Message = "Welcome",
+            Item = foundUser
+        };
+    }
 }

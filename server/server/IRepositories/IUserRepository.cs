@@ -8,4 +8,5 @@ public interface IUserRepository
     Task<LoginResponseDTO> LoginUser(LoginDTO data);
     Task<LogoutDTO> LogoutUser(string email);
     Task<ResultDTO> ChangeUserPassword(string id, ChnagePasswordDTO model);
+    Task<ResultDTO> getUserInformation(string id);
 }

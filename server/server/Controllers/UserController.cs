@@ -64,6 +64,26 @@ public class UserController : ControllerBase
         
         return Ok(new {result.Token});
     }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> me()
+    {
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (id == null)
+        {
+            return Unauthorized(new { message = "The user is not loged" });
+        }
+
+        ResultDTO response = await _userRepository.getUserInformation(id);
+        if (!response.result)
+        {
+            return BadRequest(response.Message);
+        }
+
+        return Ok(new { message = "The user is retrived", User = response.Item });
+
+    }
     [Authorize]
     [HttpGet("logout")]
     public async Task<IActionResult> logout()
