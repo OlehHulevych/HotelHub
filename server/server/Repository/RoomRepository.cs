@@ -134,11 +134,21 @@ public class RoomRepository:IRoomRepository
         };
     }
 
-    public async Task<PaginationDTO> getALlRooms([FromQuery] PaginationParams pagination)
+    public async Task<PaginatedItems<Room>> getALlRooms(PaginationDTO pagination)
     {
         var query = _context.Rooms.AsQueryable();
         var length = await _context.Rooms.CountAsync();
-        var items = await query.OrderBy(p => p.Id);
+        var items = await query.OrderBy(p => p.Id)
+            .Skip((pagination.currentPage - 1) * 10)
+            .Take(10)
+            .ToListAsync();
+        if (items == null)
+        {
+            return null;
+        }
+
+        return new PaginatedItems<Room>(items,length,pagination.currentPage);
+
 
     }
 }

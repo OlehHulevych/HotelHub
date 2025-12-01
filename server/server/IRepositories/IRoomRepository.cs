@@ -1,4 +1,6 @@
 ﻿using server.DTO;
+using server.models;
+using server.Tools;
 
 namespace server.IRepositories;
 
@@ -9,6 +11,6 @@ public interface IRoomRepository
     public Task<ResultDTO> getRoom(int id);
     public Task<ResultDTO> updateRoom(UpdateRoomDTO data, int id);
     public Task<ResultDTO> deleteRoom(int id);
-    public List<Object> getALlRooms(string type, string category, string groupBy, int page);
+    public Task<PaginatedItems<Room>> getALlRooms(PaginationDTO pagination);
     
 }
