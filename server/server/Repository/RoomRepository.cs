@@ -28,7 +28,7 @@ public class RoomRepository:IRoomRepository
         }
 
         List<string> photoPaths = new List<string>();
-        var folderName = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Rooms/"+data.Name);
+        var folderName = Path.Combine(Directory.GetCurrentDirectory(), "../Uploads/Rooms/"+data.Name);
         if (!Directory.Exists(folderName))
         {
             Directory.CreateDirectory(folderName);
@@ -101,7 +101,7 @@ public class RoomRepository:IRoomRepository
 
     public async Task<ResultDTO> updateRoom(UpdateRoomDTO data, int id)
     {
-        /*var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
+        var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
         if (room == null)
         {
             return new ResultDTO
@@ -109,9 +109,46 @@ public class RoomRepository:IRoomRepository
                 result = false,
                 Message = "The room is not found"
             };
-        }*/
+        }
 
-        throw new NotImplementedException();
+        var roomPhotos = room.Photos.ToList();
+        if (data.deletedPhotos.Any())
+        {
+            var deletedPhotos = data.deletedPhotos;
+            foreach (var deletePhoto in deletedPhotos)
+            {
+                if (File.Exists(deletePhoto))
+                {
+                    File.Delete(deletePhoto);
+                }
+
+                var updatedRoomPhotos = roomPhotos.Where(photo => photo != deletePhoto).ToList();
+                roomPhotos = updatedRoomPhotos;
+            }
+        }
+
+        if (data.newPhotos.Any())
+        {
+            var newPhotos = data.newPhotos;
+            var folderName = Directory.GetCurrentDirectory() + "../Uploads/Photos/"+room.Name;
+            foreach (var Photo in newPhotos)
+            {
+                var filePath = Path.Combine(folderName, Photo.FileName);
+                roomPhotos.Append(filePath);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await Photo.CopyToAsync(stream);
+                }
+            }
+        }
+
+        room.Photos = roomPhotos;
+        await _context.SaveChangesAsync();
+        return new ResultDTO
+        {
+            result = true,
+            Message = "The room was updated"
+        };
     }
 
     public async Task<ResultDTO> deleteRoom(int id)
