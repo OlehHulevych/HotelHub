@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using server.Data;
 using server.DTO;
+using server.Helpers;
 using server.IRepositories;
 using server.models;
 using server.Tools;
@@ -11,10 +15,13 @@ namespace server.Repository;
 public class RoomRepository:IRoomRepository
 {
     private ApplicationDbContext _context;
+    private readonly Cloudinary _cloudinary;
 
-    public RoomRepository(ApplicationDbContext context)
+    public RoomRepository(ApplicationDbContext context, Cloudinary cloudinary, IOptions<CloudinarySettings> config)
     {
         _context = context;
+        var acc = new Account(config.Value.CloudName, config.Value.ApiKey, config.Value.ApiSecret);
+
     }
     public async Task<ResultDTO> createRoom(RoomDTO data)
     {
@@ -27,35 +34,9 @@ public class RoomRepository:IRoomRepository
             };
         }
 
-        List<string> photoPaths = new List<string>();
-        var folderName = Path.Combine(Directory.GetCurrentDirectory(), "../Uploads/Rooms/"+data.Name);
-        if (!Directory.Exists(folderName))
-        {
-            Directory.CreateDirectory(folderName);
-        }
-
-        foreach (var photo in data.Photos)
-        {
-            if (photo.Length > 0)
-            {
-                var filePath = Path.Combine(folderName, photo.FileName);
-                photoPaths.Append(filePath);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await photo.CopyToAsync(stream);
-                }
-            }
-        }
-
-        if (!photoPaths.Any())
-        {
-            return new ResultDTO
-            {
-                result = false,
-                Message = "The photos are not saved"
-            };
-        }
-
+        var uploadResult = new ImageUploadResult();
+        
+        
         var RoomType = _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
 
         var newRoom = new Room

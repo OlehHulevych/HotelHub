@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using server.Data;
+using server.Helpers;
 using server.IRepositories;
 using server.models;
 using server.Repository;
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServe
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoomTypeRepository>();
 builder.Services.AddScoped<RoomRepository>();
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
