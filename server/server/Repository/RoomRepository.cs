@@ -14,13 +14,16 @@ namespace server.Repository;
 
 public class RoomRepository:IRoomRepository
 {
-    private ApplicationDbContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly Cloudinary _cloudinary;
+    
 
-    public RoomRepository(ApplicationDbContext context, Cloudinary cloudinary, IOptions<CloudinarySettings> config)
+    public RoomRepository(ApplicationDbContext context,  IOptions<CloudinarySettings> config)
     {
         _context = context;
         var acc = new Account(config.Value.CloudName, config.Value.ApiKey, config.Value.ApiSecret);
+        _cloudinary = new Cloudinary(acc);
+        
 
     }
     public async Task<ResultDTO> createRoom(RoomDTO data)
@@ -34,10 +37,27 @@ public class RoomRepository:IRoomRepository
             };
         }
 
-        var uploadResult = new ImageUploadResult();
-        
-        
-        var RoomType = _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
+        List<string> photoPaths = new List<string>();
+        foreach (var photo in data.Photos)
+        {
+            if (photo.Length > 0)
+            {
+                using var stream = photo.OpenReadStream();
+                var uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(photo.FileName, stream),
+                    Folder = "HotelHub/"+data.Name
+
+                };
+                var UploadResult = new ImageUploadResult();
+                UploadResult = await _cloudinary.UploadAsync(uploadParams);
+                //Console.WriteLine("This is: "+UploadResult.SecureUrl);
+                //Console.WriteLine("This is Error: "+UploadResult.Error.Message);
+                photoPaths.Add(UploadResult.SecureUrl.AbsoluteUri);
+
+            }
+        }
+        var RoomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
 
         var newRoom = new Room
         {
@@ -45,15 +65,17 @@ public class RoomRepository:IRoomRepository
             PricePerNight = data.pricePerNight,
             Photos = photoPaths,
             RoomTypeId = RoomType.Id,
-            Description = data.Description
+            Description = data.Description,
+            
+            
         };
-        var room = await _context.Rooms.AddAsync(newRoom);
+        await _context.Rooms.AddAsync(newRoom);
         await _context.SaveChangesAsync();
         return new ResultDTO
         {
             result = true,
             Message = "The room is created",
-            Item = room
+            
         };
 
 

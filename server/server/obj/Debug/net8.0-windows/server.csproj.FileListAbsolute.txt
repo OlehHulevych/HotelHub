@@ -139,3 +139,5 @@ F:\Projects\HotelHub\server\server\obj\Debug\net8.0-windows\server.genruntimecon
 F:\Projects\HotelHub\server\server\obj\Debug\net8.0-windows\ref\server.dll
 F:\Projects\HotelHub\server\server\bin\Debug\net8.0-windows\BCrypt.Net-Next.dll
 F:\Projects\HotelHub\server\server\bin\Debug\net8.0-windows\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+F:\Projects\HotelHub\server\server\bin\Debug\net8.0-windows\CloudinaryDotNet.dll
+F:\Projects\HotelHub\server\server\bin\Debug\net8.0-windows\Newtonsoft.Json.dll
