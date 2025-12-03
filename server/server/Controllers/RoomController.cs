@@ -16,6 +16,22 @@ public class RoomController:ControllerBase
         _roomRepository = roomRepository;
     }
 
+    public async Task<IActionResult> getAll([FromQuery] PaginationDTO queries)
+    {
+        if (queries == null)
+        {
+            return BadRequest("There is no any queries for getting items");
+        }
+
+        var response = await _roomRepository.getALlRooms(queries);
+        if (response.Items==null)
+        {
+            return BadRequest(new { message = "Something went wrong" });
+        }
+
+        return Ok(response);
+    }
+
     [HttpPost]
     public async Task<IActionResult> createPost([FromForm] RoomDTO data)
     {

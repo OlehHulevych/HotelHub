@@ -11,6 +11,6 @@ public interface IRoomRepository
     public Task<ResultDTO> getRoom(int id);
     public Task<ResultDTO> updateRoom(UpdateRoomDTO data, int id);
     public Task<ResultDTO> deleteRoom(int id);
-    public Task<PaginatedItems<Room>> getALlRooms(PaginationDTO pagination);
+    public Task<PaginatedItemsDTO<Room>> getALlRooms(PaginationDTO pagination);
     
 }

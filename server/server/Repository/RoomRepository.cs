@@ -174,7 +174,7 @@ public class RoomRepository:IRoomRepository
         };
     }
 
-    public async Task<PaginatedItems<Room>> getALlRooms(PaginationDTO pagination)
+    public async Task<PaginatedItemsDTO<Room>> getALlRooms(PaginationDTO pagination)
     {
         var query = _context.Rooms.AsQueryable();
         var length = await _context.Rooms.CountAsync();
@@ -187,7 +187,12 @@ public class RoomRepository:IRoomRepository
             return null;
         }
 
-        return new PaginatedItems<Room>(items,length,pagination.currentPage);
+        return new PaginatedItemsDTO<Room>()
+        {
+            Items = items,
+            CurrentPage = pagination.currentPage,
+            TotalPage = length / 10
+        };
 
 
     }
