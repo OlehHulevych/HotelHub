@@ -2,8 +2,8 @@
 
 public class PaginationDTO
 {
-    
-    public int currentPage { get; set; }
-    public string type { get; set; }
-    
+
+    public int currentPage { get; set; } = 1;
+    public string type { get; set; } = "";
+
 }

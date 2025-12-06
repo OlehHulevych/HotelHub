@@ -4,7 +4,7 @@ using server.DTO;
 using server.Repository;
 
 namespace server.Controllers;
-[Authorize(Roles = "ADMIN")]
+
 [Route("api/room")]
 [ApiController]
 public class RoomController:ControllerBase
@@ -15,14 +15,11 @@ public class RoomController:ControllerBase
     {
         _roomRepository = roomRepository;
     }
-
+    
+    [HttpGet]
     public async Task<IActionResult> getAll([FromQuery] PaginationDTO queries)
     {
-        if (queries == null)
-        {
-            return BadRequest("There is no any queries for getting items");
-        }
-
+       
         var response = await _roomRepository.getALlRooms(queries);
         if (response.Items==null)
         {
@@ -31,7 +28,7 @@ public class RoomController:ControllerBase
 
         return Ok(response);
     }
-
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<IActionResult> createPost([FromForm] RoomDTO data)
     {

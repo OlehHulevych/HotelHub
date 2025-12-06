@@ -176,7 +176,17 @@ public class RoomRepository:IRoomRepository
 
     public async Task<PaginatedItemsDTO<Room>> getALlRooms(PaginationDTO pagination)
     {
-        var query = _context.Rooms.AsQueryable();
+        IQueryable<Room> query;
+        
+        if (pagination.type != "")
+        {
+            query = _context.Rooms.Include(r => r.Type).AsQueryable();
+        }
+        else
+        {
+            query = _context.Rooms.AsQueryable();
+        }
+        
         var length = await _context.Rooms.CountAsync();
         var items = await query.OrderBy(p => p.Id)
             .Skip((pagination.currentPage - 1) * 10)
