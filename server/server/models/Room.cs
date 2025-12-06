@@ -1,4 +1,6 @@
-﻿namespace server.models;
+﻿using server.DTO;
+
+namespace server.models;
 
 public class Room
 {
@@ -8,7 +10,7 @@ public class Room
     public RoomType Type { get; set; }
     public int PricePerNight { get; set; }
     public string Description { get; set; }
-    public List<string> Photos { get; set; } = new();
+    public List<Photo> Photos { get; set; } = new();
     public List<Reservation> Reservations { get; set; } = new();
     
 }

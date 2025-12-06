@@ -16,6 +16,7 @@ public class ApplicationDbContext:IdentityDbContext<User>
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<Token> Tokens { get; set; }
     public DbSet<RoomType> RoomTypes { get; set; }
+    public DbSet<Photo> Photos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

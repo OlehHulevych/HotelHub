@@ -37,7 +37,7 @@ public class RoomRepository:IRoomRepository
             };
         }
 
-        List<string> photoPaths = new List<string>();
+        List<Photo> photoPaths = new List<Photo>();
         foreach (var photo in data.Photos)
         {
             if (photo.Length > 0)
@@ -51,9 +51,17 @@ public class RoomRepository:IRoomRepository
                 };
                 var UploadResult = new ImageUploadResult();
                 UploadResult = await _cloudinary.UploadAsync(uploadParams);
-                //Console.WriteLine("This is: "+UploadResult.SecureUrl);
+                Console.WriteLine("_______________________");
+                Console.WriteLine("This is: "+UploadResult.SecureUrl);
+                Console.WriteLine("This is: "+UploadResult.PublicId);
+                Console.WriteLine("_______________________");
                 //Console.WriteLine("This is Error: "+UploadResult.Error.Message);
-                photoPaths.Add(UploadResult.SecureUrl.AbsoluteUri);
+                Photo photoInfo = new Photo
+                {
+                    Uri = UploadResult.SecureUrl.AbsoluteUri,
+                    public_id = UploadResult.PublicId
+                };
+                photoPaths.Add(photoInfo);
 
             }
         }
@@ -104,59 +112,16 @@ public class RoomRepository:IRoomRepository
 
     public async Task<ResultDTO> updateRoom(UpdateRoomDTO data, int id)
     {
-        var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
-        if (room == null)
-        {
-            return new ResultDTO
-            {
-                result = false,
-                Message = "The room is not found"
-            };
-        }
-
-        var roomPhotos = room.Photos.ToList();
-        if (data.deletedPhotos.Any())
-        {
-            var deletedPhotos = data.deletedPhotos;
-            foreach (var deletePhoto in deletedPhotos)
-            {
-                if (File.Exists(deletePhoto))
-                {
-                    File.Delete(deletePhoto);
-                }
-
-                var updatedRoomPhotos = roomPhotos.Where(photo => photo != deletePhoto).ToList();
-                roomPhotos = updatedRoomPhotos;
-            }
-        }
-
-        if (data.newPhotos.Any())
-        {
-            var newPhotos = data.newPhotos;
-            var folderName = Directory.GetCurrentDirectory() + "../Uploads/Photos/"+room.Name;
-            foreach (var Photo in newPhotos)
-            {
-                var filePath = Path.Combine(folderName, Photo.FileName);
-                roomPhotos.Append(filePath);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await Photo.CopyToAsync(stream);
-                }
-            }
-        }
-
-        room.Photos = roomPhotos;
-        await _context.SaveChangesAsync();
-        return new ResultDTO
-        {
-            result = true,
-            Message = "The room was updated"
-        };
+        throw new Exception();
     }
 
     public async Task<ResultDTO> deleteRoom(int id)
     {
         var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
+        foreach (var photo in room.Photos)
+        {
+            
+        }
         if (room == null)
         {
             return new ResultDTO()
