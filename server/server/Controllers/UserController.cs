@@ -84,27 +84,7 @@ public class UserController : ControllerBase
         return Ok(new { message = "The user is retrived", User = response.Item });
 
     }
-    [Authorize]
-    [HttpGet("logout")]
-    public async Task<IActionResult> logout()
-    {
-        string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
-        {
-            return BadRequest(new LogoutDTO
-            {
-                Error = "The id of user is not available"
-            });
-        }
-
-        bool result = await _jwtTokenService.DestroyToken(userId);
-        if (!result)
-        {
-            return BadRequest("Something went wrong");
-        }
-        HttpContext.Session.Remove("UserId");
-        return Ok("The use is loged out");
-    }
+    
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("changePassword")]
     public async Task<IActionResult> ChangePassword([FromForm] ChnagePasswordDTO model)

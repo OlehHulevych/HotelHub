@@ -12,7 +12,7 @@ using server.Data;
 namespace server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251127175511_Initial")]
+    [Migration("20251207152429_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -158,6 +158,32 @@ namespace server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("server.models.Photo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Uri")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("public_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("Photos");
+                });
+
             modelBuilder.Entity("server.models.Reservation", b =>
                 {
                     b.Property<int>("Id")
@@ -207,10 +233,6 @@ namespace server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Photos")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("PricePerNight")
                         .HasColumnType("int");
 
@@ -242,36 +264,6 @@ namespace server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RoomTypes");
-                });
-
-            modelBuilder.Entity("server.models.Token", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TokenString")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Tokens");
                 });
 
             modelBuilder.Entity("server.models.User", b =>
@@ -394,6 +386,17 @@ namespace server.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("server.models.Photo", b =>
+                {
+                    b.HasOne("server.models.Room", "Room")
+                        .WithMany("Photos")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+                });
+
             modelBuilder.Entity("server.models.Reservation", b =>
                 {
                     b.HasOne("server.models.Room", "Room")
@@ -424,19 +427,10 @@ namespace server.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("server.models.Token", b =>
-                {
-                    b.HasOne("server.models.User", "User")
-                        .WithOne("RefreshToken")
-                        .HasForeignKey("server.models.Token", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("server.models.Room", b =>
                 {
+                    b.Navigation("Photos");
+
                     b.Navigation("Reservations");
                 });
 
@@ -447,9 +441,6 @@ namespace server.Migrations
 
             modelBuilder.Entity("server.models.User", b =>
                 {
-                    b.Navigation("RefreshToken")
-                        .IsRequired();
-
                     b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618

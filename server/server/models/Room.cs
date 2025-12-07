@@ -10,7 +10,7 @@ public class Room
     public RoomType Type { get; set; }
     public int PricePerNight { get; set; }
     public string Description { get; set; }
-    public List<Photo> Photos { get; set; } = new();
-    public List<Reservation> Reservations { get; set; } = new();
+    public ICollection<Photo> Photos { get; set; }
+    public List<Reservation> Reservations { get; set; }
     
 }

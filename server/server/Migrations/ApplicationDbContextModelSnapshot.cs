@@ -163,7 +163,7 @@ namespace server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("RoomId")
+                    b.Property<int>("RoomId")
                         .HasColumnType("int");
 
                     b.Property<string>("Uri")
@@ -261,36 +261,6 @@ namespace server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RoomTypes");
-                });
-
-            modelBuilder.Entity("server.models.Token", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TokenString")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Tokens");
                 });
 
             modelBuilder.Entity("server.models.User", b =>
@@ -415,9 +385,13 @@ namespace server.Migrations
 
             modelBuilder.Entity("server.models.Photo", b =>
                 {
-                    b.HasOne("server.models.Room", null)
+                    b.HasOne("server.models.Room", "Room")
                         .WithMany("Photos")
-                        .HasForeignKey("RoomId");
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("server.models.Reservation", b =>
@@ -450,17 +424,6 @@ namespace server.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("server.models.Token", b =>
-                {
-                    b.HasOne("server.models.User", "User")
-                        .WithOne("RefreshToken")
-                        .HasForeignKey("server.models.Token", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("server.models.Room", b =>
                 {
                     b.Navigation("Photos");
@@ -475,9 +438,6 @@ namespace server.Migrations
 
             modelBuilder.Entity("server.models.User", b =>
                 {
-                    b.Navigation("RefreshToken")
-                        .IsRequired();
-
                     b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618

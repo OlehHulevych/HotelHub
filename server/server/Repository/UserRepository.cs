@@ -120,36 +120,10 @@ public class UserRepository:IUserRepository
 
     }
 
-    public async Task<LogoutDTO> LogoutUser(string email)
-    {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-        {
-            return new LogoutDTO
-            {
-                Result = false,
-                Error = "The user is not found"
-            };
-        }
+    
 
-        var token = await _context.Tokens.FirstOrDefaultAsync(item => item.UserId == user.Id);
-        if (token == null)
-        {
-            return new LogoutDTO
-            {
-                Result = false,
-                Error = "Token is not found"
-            };
-        }
-
-        _context.Tokens.Remove(token);
-        await _context.SaveChangesAsync();
-        return new LogoutDTO
-        {
-            Result = true,
-        };
-
-    }
+    
+    
 
     public async Task<ResultDTO> ChangeUserPassword(string id, ChnagePasswordDTO model)
     {

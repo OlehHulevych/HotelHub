@@ -53,20 +53,5 @@ public class JwtTokenService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
-
-
-
-    public async Task<bool> DestroyToken(string userId)
-    {
-        var Token = await _context.Tokens.FirstOrDefaultAsync(token=>token.UserId == userId);
-        if (Token == null)
-        {
-            return false;
-        }
-
-        _context.Tokens.Remove(Token);
-        await _context.SaveChangesAsync();
-        return true;
-    }
+    
 }

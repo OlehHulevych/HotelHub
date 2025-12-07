@@ -38,6 +38,19 @@ public class RoomRepository:IRoomRepository
         }
 
         List<Photo> photoPaths = new List<Photo>();
+        var RoomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
+
+        var newRoom = new Room
+        {
+            Name = data.Name,
+            PricePerNight = data.pricePerNight,
+            RoomTypeId = RoomType.Id,
+            Description = data.Description,
+            
+            
+        };
+        await _context.Rooms.AddAsync(newRoom);
+        
         foreach (var photo in data.Photos)
         {
             if (photo.Length > 0)
@@ -59,26 +72,17 @@ public class RoomRepository:IRoomRepository
                 Photo photoInfo = new Photo
                 {
                     Uri = UploadResult.SecureUrl.AbsoluteUri,
-                    public_id = UploadResult.PublicId
+                    public_id = UploadResult.PublicId,
+                    Room = newRoom
                 };
-                photoPaths.Add(photoInfo);
+                await _context.Photos.AddAsync(photoInfo);
+                await _context.SaveChangesAsync();
+
+
 
             }
         }
-        var RoomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
-
-        var newRoom = new Room
-        {
-            Name = data.Name,
-            PricePerNight = data.pricePerNight,
-            Photos = photoPaths,
-            RoomTypeId = RoomType.Id,
-            Description = data.Description,
-            
-            
-        };
-        await _context.Rooms.AddAsync(newRoom);
-        await _context.SaveChangesAsync();
+        
         return new ResultDTO
         {
             result = true,
