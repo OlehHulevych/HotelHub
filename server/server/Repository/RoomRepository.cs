@@ -124,11 +124,8 @@ public class RoomRepository:IRoomRepository
 
     public async Task<ResultDTO> deleteRoom(int id)
     {
-        var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
-        foreach (var photo in room.Photos)
-        {
-            
-        }
+        var room = await _context.Rooms.Include(r=>r.Photos).FirstOrDefaultAsync(r => r.Id == id);
+        
         if (room == null)
         {
             return new ResultDTO()
@@ -137,8 +134,13 @@ public class RoomRepository:IRoomRepository
                 Message = "The room is not found"
             };
         }
-
+        foreach (var photo in room.Photos)
+        {
+            var deleteParams = new DeletionParams(photo.public_id);
+            await _cloudinary.DestroyAsync(deleteParams);
+        }
         _context.Rooms.Remove(room);
+        await _context.SaveChangesAsync();
         return new ResultDTO
         {
             result = true,
@@ -152,7 +154,7 @@ public class RoomRepository:IRoomRepository
         
         if (pagination.type != "")
         {
-            query = _context.Rooms.Include(r => r.Type).Include(r=>r.Photos).AsQueryable();
+            query = _context.Rooms.Include(r => r.Type).Include(r=>r.Photos).Where(r=>r.Type.Name == pagination.type).AsQueryable();
         }
         else
         {

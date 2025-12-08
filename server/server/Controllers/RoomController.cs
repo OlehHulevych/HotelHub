@@ -45,4 +45,24 @@ public class RoomController:ControllerBase
 
         return Ok(response);
     }
+    
+    [Authorize(Roles = "ADMIN")]
+    [HttpDelete]
+    public async Task<IActionResult> deleteRoom([FromQuery] int id)
+    {
+        if (id == null)
+        {
+            return BadRequest("There is no id");
+        }
+
+        var response = await _roomRepository.deleteRoom(id);
+        if (!response.result)
+        {
+            return BadRequest(response.Message);
+        }
+        else
+        {
+            return Ok(response);
+        }
+    }
 }
