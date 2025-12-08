@@ -46,6 +46,7 @@ public class RoomRepository:IRoomRepository
             PricePerNight = data.pricePerNight,
             RoomTypeId = RoomType.Id,
             Description = data.Description,
+            Photos = new List<Photo>()
             
             
         };
@@ -69,24 +70,26 @@ public class RoomRepository:IRoomRepository
                 Console.WriteLine("This is: "+UploadResult.PublicId);
                 Console.WriteLine("_______________________");
                 //Console.WriteLine("This is Error: "+UploadResult.Error.Message);
-                Photo photoInfo = new Photo
+                var photoInfo = new Photo
                 {
                     Uri = UploadResult.SecureUrl.AbsoluteUri,
                     public_id = UploadResult.PublicId,
                     Room = newRoom
                 };
-                await _context.Photos.AddAsync(photoInfo);
-                await _context.SaveChangesAsync();
+                newRoom.Photos.Add(photoInfo);
+                
 
 
 
             }
         }
+        await _context.SaveChangesAsync();
         
         return new ResultDTO
         {
             result = true,
             Message = "The room is created",
+            
             
         };
 
@@ -149,11 +152,11 @@ public class RoomRepository:IRoomRepository
         
         if (pagination.type != "")
         {
-            query = _context.Rooms.Include(r => r.Type).AsQueryable();
+            query = _context.Rooms.Include(r => r.Type).Include(r=>r.Photos).AsQueryable();
         }
         else
         {
-            query = _context.Rooms.AsQueryable();
+            query = _context.Rooms.Include(r => r.Type).Include(r=>r.Photos).AsQueryable();
         }
         
         var length = await _context.Rooms.CountAsync();
