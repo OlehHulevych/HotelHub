@@ -119,6 +119,38 @@ public class RoomRepository:IRoomRepository
 
     public async Task<ResultDTO> updateRoom(UpdateRoomDTO data, int id)
     {
+        var roomFoUpdate = await _context.Rooms.FirstOrDefaultAsync(r=>r.Id == id);
+        if (roomFoUpdate == null)
+        {
+            return new ResultDTO
+            {
+                result = false,
+                Message = "The room is not found"
+            };
+        }
+
+        if (data.deletedPhotos.Any())
+        {
+            foreach (var public_id in data.deletedPhotos)
+            {
+                var deletionParams = new DeletionParams(public_id);
+                await _cloudinary.DestroyAsync(deletionParams);
+                var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.public_id == public_id);
+                roomFoUpdate.Photos.Remove(photo);
+                _context.Photos.Remove(photo);
+            }
+        }
+
+        if (data.newPhotos.Any())
+        {
+            foreach (var photo in data.newPhotos)
+            {
+                using var newStream = photo.OpenReadStream();
+                
+               
+            }
+        }
+
         throw new Exception();
     }
 
