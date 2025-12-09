@@ -37,7 +37,7 @@ public class RoomRepository:IRoomRepository
             };
         }
 
-        List<Photo> photoPaths = new List<Photo>();
+        
         var RoomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
 
         var newRoom = new Room
@@ -119,14 +119,24 @@ public class RoomRepository:IRoomRepository
 
     public async Task<ResultDTO> updateRoom(UpdateRoomDTO data, int id)
     {
-        var roomFoUpdate = await _context.Rooms.FirstOrDefaultAsync(r=>r.Id == id);
-        if (roomFoUpdate == null)
+        var roomForUpdate = await _context.Rooms.Include(r=>r.Type).Include(r=>r.Photos).FirstOrDefaultAsync(r=>r.Id == id);
+        if (roomForUpdate == null)
         {
             return new ResultDTO
             {
                 result = false,
                 Message = "The room is not found"
             };
+        }
+
+        roomForUpdate.Name = String.IsNullOrEmpty(data.Name) ? roomForUpdate.Name:data.Name;
+        roomForUpdate.Description = data.Description.Trim()==""? roomForUpdate.Description:data.Description;
+        roomForUpdate.PricePerNight = data.pricePerNight == 0 ? roomForUpdate.PricePerNight:data.pricePerNight;
+        if (!string.IsNullOrEmpty(data.RoomType))
+        {
+            var type = await _context.RoomTypes.FirstOrDefaultAsync(t => t.Name == data.RoomType);
+            roomForUpdate.RoomTypeId = type.Id;
+            roomForUpdate.Type = type;
         }
 
         if (data.deletedPhotos.Any())
@@ -136,7 +146,7 @@ public class RoomRepository:IRoomRepository
                 var deletionParams = new DeletionParams(public_id);
                 await _cloudinary.DestroyAsync(deletionParams);
                 var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.public_id == public_id);
-                roomFoUpdate.Photos.Remove(photo);
+                roomForUpdate.Photos.Remove(photo);
                 _context.Photos.Remove(photo);
             }
         }
@@ -145,13 +155,42 @@ public class RoomRepository:IRoomRepository
         {
             foreach (var photo in data.newPhotos)
             {
-                using var newStream = photo.OpenReadStream();
+                if(photo.Length>0)
+                {
+                    using var newStream = photo.OpenReadStream();
+                    var UploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(photo.FileName, newStream),
+                        Folder = "HotelHub/" + roomForUpdate.Name
+                    };
+                    var UploadResult = new ImageUploadResult();
+                    UploadResult = await _cloudinary.UploadAsync(UploadParams);
+                    var photoInfo = new Photo
+                    {
+                        public_id = UploadResult.PublicId,
+                        Uri = UploadResult.SecureUrl.AbsoluteUri,
+                        Room = roomForUpdate
+                    };
+                    roomForUpdate.Photos.Add(photoInfo);
+                }
                 
                
             }
         }
 
-        throw new Exception();
+        
+        
+        await _context.SaveChangesAsync();
+        return new ResultDTO
+        {
+            Message = "The room is updated",
+            Item = roomForUpdate,
+            result = true
+
+
+        };
+
+
     }
 
     public async Task<ResultDTO> deleteRoom(int id)

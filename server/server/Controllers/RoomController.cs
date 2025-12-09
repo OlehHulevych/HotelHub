@@ -45,6 +45,32 @@ public class RoomController:ControllerBase
 
         return Ok(response);
     }
+
+    [Authorize(Roles = "ADMIN")]
+    [HttpPost("update")]
+    public async Task<IActionResult> updateRoom([FromQuery] int id, [FromForm] UpdateRoomDTO data)
+    {
+        if (id == 0)
+        {
+            return BadRequest("There is not id for updating room");
+        }
+
+        if (data == null)
+        {
+            return BadRequest("There is no any data to update room");
+        }
+
+        var response = await _roomRepository.updateRoom(data,id);
+        if (!response.result)
+        {
+            return BadRequest(response.Message);
+        }
+        else
+        {
+            return Ok(response);
+        }
+
+    }
     
     [Authorize(Roles = "ADMIN")]
     [HttpDelete]
