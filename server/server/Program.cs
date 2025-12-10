@@ -29,6 +29,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServe
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoomTypeRepository>();
 builder.Services.AddScoped<RoomRepository>();
+builder.Services.AddScoped<ReservationRepository>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
