@@ -60,7 +60,7 @@ public class RoomRepository:IRoomRepository
                 var uploadParams = new ImageUploadParams()
                 {
                     File = new FileDescription(photo.FileName, stream),
-                    Folder = "HotelHub/"+data.Name
+                    Folder = "HotelHub"
 
                 };
                 var UploadResult = new ImageUploadResult();
