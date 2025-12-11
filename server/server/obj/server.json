@@ -5,6 +5,52 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/reservation": {
+      "post": {
+        "tags": [
+          "Reservation"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "RoomId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "CheckIn": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "CheckOut": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              },
+              "encoding": {
+                "RoomId": {
+                  "style": "form"
+                },
+                "CheckIn": {
+                  "style": "form"
+                },
+                "CheckOut": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/room": {
       "get": {
         "tags": [
@@ -66,6 +112,115 @@
                 }
               },
               "encoding": {
+                "Name": {
+                  "style": "form"
+                },
+                "RoomType": {
+                  "style": "form"
+                },
+                "pricePerNight": {
+                  "style": "form"
+                },
+                "Description": {
+                  "style": "form"
+                },
+                "Photos": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Room"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/room/update": {
+      "post": {
+        "tags": [
+          "Room"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "newPhotos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  },
+                  "deletedPhotos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "Name": {
+                    "type": "string"
+                  },
+                  "RoomType": {
+                    "type": "string"
+                  },
+                  "pricePerNight": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "Description": {
+                    "type": "string"
+                  },
+                  "Photos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "newPhotos": {
+                  "style": "form"
+                },
+                "deletedPhotos": {
+                  "style": "form"
+                },
                 "Name": {
                   "style": "form"
                 },

@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using server.DTO;
 using server.Repository;
@@ -33,5 +34,24 @@ public class ReservationController:ControllerBase
 
         return Ok(response);
     }
+    
+    [HttpPut]
+    public async Task<IActionResult> updateReservation([FromBody] UpdateReservationDTO data, [FromQuery] int id )
+    {
+        if (data == null)
+        {
+            return BadRequest("There is not data for editing");
+        }
+
+        var response = await _reservationRepository.editReservation(data, id);
+        if (!response.result)
+        {
+            return BadRequest(response.Message);
+        }
+
+        return Ok(response);
+    }
+    
+    
 
 }

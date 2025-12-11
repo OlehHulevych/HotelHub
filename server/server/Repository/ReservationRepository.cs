@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.InteropServices.JavaScript;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.DTO;
 using server.IRepositories;
@@ -16,9 +18,9 @@ public class ReservationRepository:IReservationRepository
     }
     public async Task<ResultDTO> createReservation(ReservationDTO data, string id)
     {
-        var userCheckOut = data.CheckOut.Date;
-        var userCheckIn = data.CheckIn.Date;
-        var userDiff = userCheckOut.Subtract(userCheckIn);
+        var userCheckOut = data.CheckOut;
+        var userCheckIn = data.CheckIn;
+        var userDiff = userCheckOut.DayNumber - userCheckIn.DayNumber;
         Console.WriteLine(userDiff);
         var userRoom = await _context.Rooms.Include(r=>r.Reservations).FirstOrDefaultAsync(r=>r.Id == data.RoomId);
         if (userRoom == null)
@@ -47,7 +49,7 @@ public class ReservationRepository:IReservationRepository
             }
         }
         var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id==id);
-        var totalPrice = userDiff.Days * userRoom.PricePerNight;
+        var totalPrice = userDiff * userRoom.PricePerNight;
 
         Reservation newReservation = new Reservation
         {
@@ -68,6 +70,40 @@ public class ReservationRepository:IReservationRepository
         {
             result = true,
             Message = "The reservation was created"
+        };
+    }
+
+    public async Task<ResultDTO> editReservation(UpdateReservationDTO data, int id)
+    {
+        var userReservation = await _context.Reservations.Include(reserv=>reserv.Room).FirstOrDefaultAsync(r=>r.Id==id);
+        var reservedRoom = await _context.Rooms.Include(r => r.Reservations).FirstOrDefaultAsync(r=>r.Id==userReservation.RoomId);
+        var RoomReservations = reservedRoom.Reservations;
+        var newCheckIn = data.CheckIn == DateOnly.MinValue ? userReservation.CheckInDate:data.CheckIn;
+        var newCheckOut = data.CheckOut == DateOnly.MinValue ? userReservation.CheckInDate:data.CheckOut;
+
+        foreach (var reservation in RoomReservations)
+        {
+            var checkIn = reservation.CheckInDate;
+            var checkOut = reservation.CheckOutDate;
+            if (checkOut > newCheckIn && reservation.Id != id || newCheckOut < checkOut && reservation.Id != id)
+            {
+                return new ResultDTO
+                {
+                    Message = "The range which you selected is occupied",
+                    result = false
+                };
+            }
+        }
+
+        userReservation.CheckInDate = newCheckIn;
+        userReservation.CheckOutDate = newCheckOut;
+        userReservation.TotalPrice = (newCheckOut.DayNumber - newCheckIn.DayNumber)*reservedRoom.PricePerNight;
+
+        await _context.SaveChangesAsync();
+        return new ResultDTO()
+        {
+            result = true,
+            Message = "The reservation was updated"
         };
     }
 }
