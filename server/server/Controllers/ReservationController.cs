@@ -51,6 +51,19 @@ public class ReservationController:ControllerBase
 
         return Ok(response);
     }
+    [Authorize]
+    [HttpDelete]
+    public async Task<IActionResult> deleteReservation([FromQuery] int id)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var response = await _reservationRepository.deleteReservation(id, userId);
+        if (!response.result)
+        {
+            return BadRequest(response.Message);
+        }
+
+        return Ok(response);
+    }
     
     
 

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.DTO;
@@ -11,15 +12,26 @@ namespace server.Repository;
 public class ReservationRepository:IReservationRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<User> _userManager;
 
-    public ReservationRepository(ApplicationDbContext context)
+    public ReservationRepository(ApplicationDbContext context,UserManager<User> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
     public async Task<ResultDTO> createReservation(ReservationDTO data, string id)
     {
         var userCheckOut = data.CheckOut;
         var userCheckIn = data.CheckIn;
+        if (userCheckIn < DateOnly.FromDateTime(DateTime.UtcNow) ||
+            userCheckOut < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            return new ResultDTO
+            {
+                Message = "The period which is choose is past.Please select another",
+                result = false
+            };
+        }
         var userDiff = userCheckOut.DayNumber - userCheckIn.DayNumber;
         Console.WriteLine(userDiff);
         var userRoom = await _context.Rooms.Include(r=>r.Reservations).FirstOrDefaultAsync(r=>r.Id == data.RoomId);
@@ -104,6 +116,47 @@ public class ReservationRepository:IReservationRepository
         {
             result = true,
             Message = "The reservation was updated"
+        };
+    }
+
+    public async Task<ResultDTO> deleteReservation(int id, string userId)
+    {
+        if (id == 0)
+        {
+            return new ResultDTO
+            {
+                Message = "There is no id of reservation",
+                result = false
+            };
+        }
+
+        var reservation = await _context.Reservations.Include(u=>u.User).FirstOrDefaultAsync(r => r.Id == id);
+        if (reservation == null)
+        {
+            return new ResultDTO
+            {
+                Message = "The reservation is not found",
+                result = false
+            };
+        }
+
+        var checkingUser = await _userManager.FindByIdAsync(userId);
+        Console.WriteLine(checkingUser.Id);
+        if (!reservation.UserId.Equals(checkingUser.Id))
+        {
+            return new ResultDTO
+            {
+                Message = "Access is denied",
+                result = false
+            };
+        }
+
+        _context.Reservations.Remove(reservation);
+        await _context.SaveChangesAsync();
+        return new ResultDTO
+        {
+            result = true,
+            Message = "The reservation was deleted"
         };
     }
 }
