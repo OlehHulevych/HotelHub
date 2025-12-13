@@ -10,6 +10,6 @@ public class Reservation
     public DateOnly CheckInDate { get; set; }
     public DateOnly CheckOutDate { get; set; }
     public int TotalPrice { get; set; }
-    public string Status = Statuses.Active;
+    public string Status { get; set; }
 
 }

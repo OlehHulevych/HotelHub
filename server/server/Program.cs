@@ -11,6 +11,7 @@ using server.Helpers;
 using server.IRepositories;
 using server.models;
 using server.Repository;
+using server.Services;
 using server.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,7 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoomTypeRepository>();
 builder.Services.AddScoped<RoomRepository>();
 builder.Services.AddScoped<ReservationRepository>();
+builder.Services.AddScoped<ReservationBackgroundService>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
