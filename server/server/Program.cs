@@ -32,6 +32,7 @@ builder.Services.AddScoped<RoomTypeRepository>();
 builder.Services.AddScoped<RoomRepository>();
 builder.Services.AddScoped<ReservationRepository>();
 builder.Services.AddScoped<ReservationBackgroundService>();
+builder.Services.AddHostedService<ReservationBackgroundService>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()

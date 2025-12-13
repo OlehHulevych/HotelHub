@@ -6,13 +6,13 @@ namespace server.Services;
 
 public class ReservationBackgroundService:BackgroundService
 {
-    private readonly ApplicationDbContext _context;
+    
     private readonly IServiceProvider _services;
 
 
-    public ReservationBackgroundService(ApplicationDbContext context, IServiceProvider services)
+    public ReservationBackgroundService(IServiceProvider services)
     {
-        _context = context;
+        
         _services = services;
 
     }
@@ -23,10 +23,11 @@ public class ReservationBackgroundService:BackgroundService
         {
             using (var scope = _services.CreateScope())
             {
+                var _context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var reservations = await _context.Reservations.ToListAsync();
                 foreach (var reservation in reservations)
                 {
-                    if (DateOnly.FromDateTime(DateTime.Today) > reservation.CheckOutDate)
+                    if (DateOnly.FromDateTime(DateTime.UtcNow) > reservation.CheckOutDate)
                     {
                         reservation.Status = Statuses.Canceled;
                     }
@@ -34,12 +35,12 @@ public class ReservationBackgroundService:BackgroundService
 
                 await _context.SaveChangesAsync();
             }
-            
+            await Task.Delay(TimeSpan.FromHours(1), cancellationToken);
         }
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await this.CheckIfExpired(stoppingToken);
-        await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+        
     }
 }
